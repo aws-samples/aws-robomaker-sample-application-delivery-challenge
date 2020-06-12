@@ -1,0 +1,86 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+
+#
+# This node give navigation stack the control over cloud.
+#
+# このノードは navigation スタックへの操作をクラウドからできるようにします。
+# 
+
+import rospy
+import json
+from std_msgs.msg import String
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from tf import TransformListener
+from nav_msgs.msg import Odometry
+import actionlib
+from move_base_msgs.msg import MoveBaseAction, MoveBaseGoal
+from geometry_msgs.msg import Quaternion
+
+class Navigation():
+    def __init__(self):
+        self._remote_sub = rospy.Subscriber('/awsiot_to_ros', String, self.awsiot_to_ros_cb, queue_size=1)
+
+    def main(self):
+        rospy.spin()
+
+    def awsiot_to_ros_cb(self, message):
+        try:
+            message_json = json.loads(message.data)
+            payload = message_json['payload']
+            if 'command' in payload and payload['command'] == "navigation":
+                if 'action' in payload and payload['action'] == 'setGoal':
+
+                    goal_x = float(payload['x'])
+                    goal_y = float(payload['y'])
+                    goal_yaw = float(payload['yaw'])
+
+                    rospy.loginfo("Navigatoin setGoal {} {} {}".format(goal_x, goal_y, goal_yaw))
+
+                    listener = TransformListener()
+
+                    client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+                    client.wait_for_server()
+                    listener.waitForTransform("map", "base_link", rospy.Time(), rospy.Duration(6.0))
+
+                    q = quaternion_from_euler(0,0,goal_yaw)
+
+                    goal_pose = MoveBaseGoal()
+                    goal_pose.target_pose.header.frame_id = 'map'
+                    goal_pose.target_pose.pose.position.x = goal_x
+                    goal_pose.target_pose.pose.position.y = goal_y
+                    goal_pose.target_pose.pose.position.z = 0
+                    goal_pose.target_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
+
+                    client.send_goal(goal_pose)
+
+        except Exception as e:
+            rospy.logwarn("navigation request failed")
+            rospy.logwarn(e)
+
+                
+def main():
+    rospy.init_node('navigation')
+    navigation = Navigation()
+    navigation.main()        
+
+if __name__ == '__main__':
+    main()

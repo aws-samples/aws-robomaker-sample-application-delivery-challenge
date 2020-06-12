@@ -1,0 +1,13 @@
+awsiotpythonsdk-pip:
+  ubuntu:
+    pip:
+      packages: [AWSIoTPythonSDK]
+boto3:
+  ubuntu:
+    pip:
+      packages: [boto3]
+
+requests-pip:
+  ubuntu:
+    pip:
+      packages: [requests]

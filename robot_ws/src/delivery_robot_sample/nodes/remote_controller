@@ -1,0 +1,109 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+#
+# This node enable you to control robot moving velocity from cloud using AWS IoT.
+#
+# このノードは AWS IoT を通じてロボットの移動速度を Cloud からコントロールできるようにします
+# 
+
+import rospy
+import json
+from geometry_msgs.msg import Twist
+from std_msgs.msg import String
+import time
+
+LINERAR_SPEED = 0.1
+LINEAR_STEP = 0.1 / 3
+ANGULER_SPEED = 0.5
+ANGULER_STEP = 0.5 / 3
+
+class RemoteController():
+    def __init__(self):
+        self._cmd_pub = rospy.Publisher('/cmd_vel', Twist, queue_size=1)
+        self._remote_sub = rospy.Subscriber('/awsiot_to_ros', String, self.awsiot_to_ros_cb, queue_size=1)
+        self.twist = Twist()
+        self.next_synctime = time.time()
+        self.is_moving = False
+        self.action = ""
+        
+    def main(self):
+        while not rospy.is_shutdown():
+            if not self.is_moving:
+                time.sleep(0.3)
+                continue
+
+            while not rospy.is_shutdown():
+                d = self.next_synctime - time.time()
+                if d <= 0:
+                    break
+                time.sleep(d) 
+                
+            if self.is_moving:
+                self.sync_action()
+
+    def sync_action(self):
+        if self.action == 'forward':
+            self.twist.linear.x = min([LINERAR_SPEED, self.twist.linear.x + LINEAR_STEP])
+            self.is_moving = True
+        elif self.action == 'backward':
+            self.twist.linear.x = max([-LINERAR_SPEED, self.twist.linear.x - LINEAR_STEP])
+            self.is_moving = True
+        elif self.action == 'right':
+            self.twist.angular.z = max([-ANGULER_SPEED, self.twist.angular.z - ANGULER_STEP])
+            self.is_moving = True
+        elif self.action == 'left':
+            self.twist.angular.z = min([ANGULER_SPEED, self.twist.angular.z + ANGULER_STEP])
+            self.is_moving = True
+        if self.action == 'stop' or self.action == 'right' or self.action == 'left':
+            if self.twist.linear.x > 0:
+                self.twist.linear.x = max([0, self.twist.linear.x - LINEAR_STEP])
+            elif self.twist.linear.x < 0:
+                self.twist.linear.x = min([0, self.twist.linear.x + LINEAR_STEP])
+        if self.action == 'stop' or self.action == 'forward' or self.action == 'backward':
+            if self.twist.angular.z > 0:    
+                self.twist.angular.z = max([0, self.twist.angular.z - ANGULER_STEP])
+            elif self.twist.angular.z < 0:    
+                self.twist.angular.z = min([0, self.twist.angular.z + ANGULER_STEP])
+            
+        self.next_synctime = time.time() + 0.3
+        self._cmd_pub.publish(self.twist)
+        
+        if self.twist.linear.x == 0 and self.twist.angular.z == 0:
+            self.is_moving = False
+        
+    def awsiot_to_ros_cb(self, message):
+        try:
+            message_json = json.loads(message.data)
+            payload = message_json['payload']
+            if 'command' in payload and payload['command'] == "move":
+                rospy.loginfo("remote_controller Move {}".format(payload['action']))
+                self.action = payload['action']
+                self.sync_action()
+        except Exception as e:
+            rospy.logwarn(e)
+
+def main():
+    rospy.init_node('remote_controller')
+    remote_controller = RemoteController()
+    remote_controller.main()        
+
+if __name__ == '__main__':
+    main()

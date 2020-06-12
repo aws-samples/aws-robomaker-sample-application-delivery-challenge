@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>aws_game_manager</name>
+  <version>1.0.0</version>
+  <description>AWS Robot Delivery Challenge 2020, simulation game controller</description>
+  <url type="repository"></url>
+
+  <maintainer email="katakuji@amazon.co.jp">AWS RoboMaker</maintainer>
+  <author email="katakuji@amazon.co.jp">AWS RoboMaker</author>
+
+  <license>MIT-0</license>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_msgs</depend>
+  <depend>awsiotpythonsdk-pip</depend>
+  <depend>requests-pip</depend>
+</package>

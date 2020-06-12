@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="UTF-8">
+    <title>AWS Devliery Challenge Sample Web page</title>
+    <script src="js/aws-iot-sdk-browser-bundle.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
+    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js'></script>
+    <link rel="stylesheet" type="text/css" href="css/controller_style.css">
+</head>
+<body>
+<div class="background" id="app">
+  <div class="whiteboard">
+      <div class="top">
+          <div class="controller">
+            <div class="forward">
+              <button class="button move_button" @mousedown="move_forward_down()" @mouseup="move_forward_up()" >↑</font></button>
+            </div>
+            <div class="left">
+              <button class="button move_button"  @mousedown="move_left_down()" @mouseup="move_left_up()">←</font></button> 
+            </div>
+            <div class="stop">
+              <button class="button move_button"  @mousedown="move_stop_down()" @mouseup="move_stop_up()">・</font></button>
+            </div>
+            <div class="right">
+              <button class="button move_button"  @mousedown="move_right_down()" @mouseup="move_right_up()">→</font></button>
+            </div>
+            <div class="backward">
+              <button class="button move_button"  @mousedown="move_backward_down()" @mouseup="move_backward_up()">↓</font></button>
+            </div>
+          </div>
+          <div class="location">
+            <div class="title">Location</div>
+            <div class="name">Odometry</div>
+            <div class="odom_x">x</div>
+            <div class="odom_y">y</div>
+            <div class="odom_z">z</div>
+            <div class="odom_heading">heading</div>
+            <div class="odom_value_x">{{ ODOM_X }}</div>
+            <div class="odom_value_y">{{ ODOM_Y }}</div>
+            <div class="odom_value_z">{{ ODOM_Z }}</div>
+            <div class="odom_value_heading">{{ ODOM_ORIENTATION }}</div>
+          </div>
+    </div>
+    <div class="bottom">
+      <div class="goal">
+        <div class="title_goal">Goal</div>
+        <div class="goal_x">x</div>
+        <div class="goal_y">y</div>
+        <div class="goal_heading">heading</div>
+        <div class="goal_value_x"><input class="input_field" type="text" v-model="target_x"></div>
+        <div class="goal_value_y"><input class="input_field" type="text" v-model="target_y"></div>
+        <div class="goal_value_heading"><input class="input_field" type="text" v-model="target_orientation"></div>
+        <div class="goal_button"><button class="button action_button" @click="go_to_target()">Go To</button></div>
+      </div>
+      <div class="save">
+        <div class="save_button">
+          <button class="button action_button" @click="map_save()">Save Map</button> 
+        </div>
+      </div>
+    </div>
+  </div>
+</body>
+
+<script src="js/app-settings.js"></script>
+<script src="js/app.js"></script>
+
+</html>

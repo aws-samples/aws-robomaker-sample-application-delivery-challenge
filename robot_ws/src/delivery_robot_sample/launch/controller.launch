@@ -1,0 +1,15 @@
+<launch>
+  <include file="$(find aws_game_manager)/launch/game_manager.launch"></include>
+
+  <arg name="use_sim_time" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  <arg name="odom_update_rate" default="1" />
+  <param name="odom_update_rate" value="$(arg odom_update_rate)"/>
+
+  <param name="app_setting_file_name" value="$(optenv APP_SETTING_FILE use_default)"/>
+  <param name="app_setting_file_name_default" value="$(find delivery_robot_sample)/settings/settings.yaml"/>
+
+  <node pkg="delivery_robot_sample" type="remote_controller" name="remote_controller" output="screen"/>
+  <node pkg="delivery_robot_sample" type="location_publisher" name="location_publisher" output="screen"/>
+  <node pkg="delivery_robot_sample" type="map_controller" name="map_controller" output="screen"/>
+</launch>

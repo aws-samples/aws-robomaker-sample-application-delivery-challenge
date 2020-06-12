@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package format="2">
+  <name>delivery_challenge_simulation</name>
+  <version>1.2.0</version>
+  <description>
+    AWS RoboMaker simulation package with a TurtleBot3 in an empty Gazebo world.
+  </description>
+  <license>MIT</license>
+  <author email="ros-contributions@amazon.com">AWS RoboMaker</author>
+  <maintainer email="ros-contributions@amazon.com">AWS RoboMaker</maintainer>
+  <buildtool_depend>catkin</buildtool_depend>
+  <depend>gazebo_ros</depend>
+  <depend>gazebo_plugins</depend>
+  <depend>turtlebot3_fake</depend>
+  <depend>turtlebot3_gazebo</depend>
+  <depend>turtlebot3_simulations</depend>
+  <depend>turtlebot3_description</depend>
+  <exec_depend>gazebo</exec_depend>
+  
+  <export>
+   <gazebo_ros gazebo_model_path="${prefix}" />  
+  </export>
+</package>

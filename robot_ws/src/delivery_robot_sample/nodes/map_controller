@@ -1,0 +1,240 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+
+# 
+# This node gives the control of the map server through cloud. This node work with AWS IoT and Amazon S3.
+# When saving map is requested from cloud through AWS IoT, this node request a map to map server and save it to Amazon S3.
+# When map_download service is called, this node download map file from Amazon S3 and place it into local file system. 
+# The files are stored under /tmp and the files are map.yaml and map.pgm. 
+# The destination of Amazon S3 bucket for the map file is specified by application setting file.
+# The name of the setting file is specified by the parameter 'app_setting_file'. If the value is 'use_default', value of app_setting_file_name_default is used instead.
+#
+# このノードは AWS IoT また、Amazon S3 と連携して クラウドと Mapサーバー をつなげます。
+# AWS IoT を通して Map の保存が要求された時、マップサーバーにこれを要求し、保存されたマップ情報を Amazon S3 に保存します。
+# また、map_download　サービスを呼ぶことで Amazon S3 からマップファイルをダウンロードし、ローカルのファイルシステムにファイルを保存することができます。
+# ファイルのローカルでの保存先は /tmp 配下で保存されるファイルは map.yaml と map.pgm です。
+# Amazon S3 でのファイルの Map ファイルの保存先は設定ファイルにより指定されます。
+# 設定ファイルはパラメータ app_setting_file_nameで設定、ただしこの値が use_default の場合は パラメータ app_setting_file_name_default で指定されたファイル名から設定を読み込みます。 
+# 
+
+import rospy
+import json
+from std_msgs.msg import String
+import time
+import subprocess
+import boto3
+import os
+from delivery_robot_sample.srv import MapSaveAndUpload,MapSaveAndUploadResponse, MapDownload, MapDownloadResponse
+import yaml
+
+def upload_file(file_name, bucket, object_name=None):
+    """Upload a file to an S3 bucket
+
+    :param file_name: File to upload
+    :param bucket: Bucket to upload to
+    :param object_name: S3 object name. If not specified then file_name is used
+    :return: True if file was uploaded, else False
+    """
+
+    retry = 0
+    success = False
+    while retry < 6 and not success and not rospy.is_shutdown():
+        try:
+            accessKeyId = rospy.get_param("/aws/iot/credential/accessKeyId")
+            secretAccessKey = rospy.get_param("/aws/iot/credential/secretAccessKey")
+            sessionToken = rospy.get_param("/aws/iot/credential/sessionToken")
+
+            # If S3 object_name was not specified, use file_name
+            if object_name is None:
+                object_name = file_name
+
+            # Upload the file
+            s3_client = boto3.client('s3', aws_access_key_id = accessKeyId, aws_secret_access_key = secretAccessKey, aws_session_token = sessionToken )
+            response = s3_client.upload_file(file_name, bucket, object_name)
+            success = True
+        except Exception as e:
+            rospy.logwarn("map_controller upload_file failed")
+            rospy.logwarn(e)
+            rospy.logwarn("retry after 3 sec...")
+            time.sleep(3)
+            retry = retry + 1
+    if success:  
+        return True, ""
+    else:
+        return False, "upload failed"
+
+def download_file(bucket, object_name, file_name):
+    retry = 0
+    success = False
+    while retry < 6 and not success and not rospy.is_shutdown():
+        try:
+            rospy.logwarn("download file...")
+            accessKeyId = rospy.get_param("/aws/iot/credential/accessKeyId")
+            secretAccessKey = rospy.get_param("/aws/iot/credential/secretAccessKey")
+            sessionToken = rospy.get_param("/aws/iot/credential/sessionToken")
+
+            s3 = boto3.client('s3', aws_access_key_id = accessKeyId, aws_secret_access_key = secretAccessKey, aws_session_token = sessionToken )
+            s3.download_file(bucket, object_name, file_name)
+            success = True
+        except Exception as e:
+            rospy.logwarn("map_controller download_file failed")
+            rospy.logwarn(e)
+            rospy.logwarn("retry after 3 sec...")
+            time.sleep(3)
+            retry = retry + 1
+    if success:  
+        return True, ""
+    else:
+        return False, "download failed"
+
+class MapController():
+    def __init__(self):
+        settings = {}
+        setting_file = rospy.get_param("app_setting_file_name")
+        if setting_file == "use_default":
+            setting_file = rospy.get_param("app_setting_file_name_default")
+
+        with open(setting_file, 'r') as f:
+            try:
+                settings = yaml.safe_load(f)
+            except yaml.YAMLError as exc:
+                rospy.logerr("Navigation::yaml read error")
+                return
+        self.bucket = settings["s3_bucket"]
+        self.prefix = settings["s3_prefix"]
+
+        self._remote_sub = rospy.Subscriber('/awsiot_to_ros', String, self.awsiot_to_ros_cb, queue_size=1)
+        self._remote_pub = rospy.Publisher('/ros_to_awsiot', String, queue_size=10)
+
+        s1 = rospy.Service('map_save_and_upload', MapSaveAndUpload, self.handle_save_and_upload_svc)
+        s2 = rospy.Service('map_download', MapDownload, self.handle_download_svc)
+
+    def main(self):
+        rospy.spin()
+        
+    def handle_save_and_upload_svc(self, request):
+        print(request)
+        rospy.loginfo("Map controller save_and_upload called")
+        (s,m) = self.save_and_upload()
+        return MapSaveAndUpload(s,m)
+
+
+    def handle_download_svc(self, request):
+        rospy.loginfo("Map controller download called")
+        (s,m) = self.download() 
+        return MapDownloadResponse(s,m)
+
+    def save_and_upload(self):
+
+        success = False
+        message = ""
+
+        rospy.loginfo("s3_bucket {}".format(self.bucket))
+        rospy.loginfo("s3_prefix {}".format(self.prefix))
+
+        result = subprocess.call("rosrun map_server map_saver -f /tmp/map".split())
+        if result == 0 and os.path.exists("/tmp/map.pgm") and os.path.exists("/tmp/map.yaml"):
+            rospy.loginfo("map saved!")
+            object_name = "{}/{}".format(self.prefix, "map.pgm")
+            (r, e) = upload_file("/tmp/map.pgm", self.bucket, object_name)
+            if r:
+                object_name = "{}/{}".format(self.prefix, "map.yaml")
+                (r,e) = upload_file("/tmp/map.yaml", self.bucket, object_name)
+                if r:
+                    success = True
+                    message = "Uploading map file succeeded!"
+                else:
+                    message = "uploading map.yaml failed.. {}".format(e)
+            else:
+                message = "uploading map.pgm failed.. {}".format(e)
+        else:
+            message = "map file hasn't saved properly.."
+
+        return success, message
+
+    def download(self):
+        success = False
+        message = ""
+
+        rospy.loginfo("s3_bucket {}".format(self.bucket))
+        rospy.loginfo("s3_prefix {}".format(self.prefix))
+
+        object_name = "{}/{}".format(self.prefix, "map.pgm")
+        if download_file(self.bucket, object_name,"/tmp/map.pgm"):
+            object_name = "{}/{}".format(self.prefix, "map.yaml")
+            (r,e) = download_file(self.bucket, object_name, "/tmp/map.yaml")
+            if r:
+                success = True
+                message = "Downloading map file succeeded!"
+            else:
+                message = "download map.yaml failed.. {}".format(e)
+        else:
+            message = "download map.pgm failed.. {}".format(e)
+
+        return success, message
+
+
+    def awsiot_to_ros_cb(self, message):
+        try:
+            message_json = json.loads(message.data)
+            payload = message_json['payload']
+            if 'command' in payload \
+                    and payload['command'] == "map" \
+                    and 'action' in payload \
+                    and 'request_id' in payload: 
+
+                request_id = payload['request_id']
+
+                if payload['action'] == 'save':
+
+                    (s, m) = self.save_and_upload()
+
+                    result = {}
+                    result["command"] = "result"
+                    result["request_id"] = request_id
+                    result["result"] = "success" if s else "fail"
+                    result["message"] = m
+
+                    self._remote_pub.publish(json.dumps(result)) 
+
+                elif payload['action'] == 'load':
+
+                    (s, m) = self.download()
+                    result = {}
+                    result["command"] = "result"
+                    result["request_id"] = request_id
+                    result["result"] = "success" if s else "fail"
+                    result["message"] = m
+
+                    self._remote_pub.publish(json.dumps(result)) 
+
+        except Exception as e:
+            rospy.logerr("map_controller awsiot_to_ros_cb failed")
+            rospy.logerr(e)
+        
+                
+def main():
+    rospy.init_node('map_controller')
+    map_controller = MapController()
+    map_controller.main()        
+
+if __name__ == '__main__':
+    main()

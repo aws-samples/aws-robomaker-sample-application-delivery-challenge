@@ -1,0 +1,88 @@
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+#
+# Copyright 2020 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+# SPDX-License-Identifier: MIT-0
+#
+# Permission is hereby granted, free of charge, to any person obtaining a copy of this
+# software and associated documentation files (the "Software"), to deal in the Software
+# without restriction, including without limitation the rights to use, copy, modify,
+# merge, publish, distribute, sublicense, and/or sell copies of the Software, and to
+# permit persons to whom the Software is furnished to do so.
+#
+# THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED,
+# INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A
+# PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT
+# HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION
+# OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
+# SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+#
+
+
+# 
+# This node publishes location of the controlling robot through AWS IoT
+#
+# このノードは AWS IoT 経由でクラウドにロボットの位置を通知します。
+# 
+
+import rospy
+import json
+from std_msgs.msg import String
+from tf.transformations import euler_from_quaternion, quaternion_from_euler
+from nav_msgs.msg import Odometry
+
+class LocationPublisher(): 
+    def __init__(self):
+        self._remote_pub = rospy.Publisher('/ros_to_awsiot', String, queue_size=1)
+
+        self._UPDAE_RATE = rospy.get_param("odom_update_rate")
+        if self._UPDAE_RATE != 0:
+            self._odom_sub = rospy.Subscriber ('/odom', Odometry, self._updata_odom)
+        self._odom = None
+
+    def _updata_odom(self, msg):
+        self._odom = msg
+
+    def main(self):
+        if self._UPDAE_RATE == 0:
+            rospy.spin()
+            return
+
+        rate = rospy.Rate(min([self._UPDAE_RATE, 10]))   #limit to 10 Hz
+            
+        while not rospy.is_shutdown():
+            payload = {}
+
+            if self._odom != None:
+                try:
+                    orientation = self._odom.pose.pose.orientation
+                    (roll, pitch, yaw) = euler_from_quaternion ([orientation.x, orientation.y, orientation.z, orientation.w] )
+                    payload['odom'] = { 
+                            'x' : self._odom.pose.pose.position.x,
+                            'y' : self._odom.pose.pose.position.y,
+                            'z' : self._odom.pose.pose.position.z,
+                            'roll': roll,
+                            'pitch': pitch,
+                            'yaw': yaw
+                        }
+                except Exception as e:
+                    rospy.logwarn(e)
+
+            payload['time'] = rospy.Time.now().to_sec()
+            payload['command'] = "location"
+
+            try:
+                self._remote_pub.publish(json.dumps(payload))                             
+            except Exception as e:
+                rospy.logerr("location_publisher publish to aws iot failed")
+                rospy.logerr(e)
+
+            rate.sleep()
+                
+def main():
+    rospy.init_node('location_publisher')
+    location_publisher = LocationPublisher()
+    location_publisher.main()        
+
+if __name__ == '__main__':
+    main()

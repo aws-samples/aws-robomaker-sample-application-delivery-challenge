@@ -1,0 +1,6 @@
+<launch>
+  <node name="aws_game_manager" pkg="aws_game_manager" type="aws_game_manager.py" required="true">
+    <param name="aws_iot_config_file" value="$(optenv AWS_IOT_CONFIG_FILE use_default)"/>
+    <param name="aws_iot_config_file_default" value="$(find aws_game_manager)/certs/config.yaml"/>
+  </node>
+</launch>

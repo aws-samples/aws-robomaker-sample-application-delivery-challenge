@@ -1,0 +1,4 @@
+<launch>
+  <include file="$(find delivery_robot_sample)/launch/controller.launch" />
+  <include file="$(find delivery_robot_sample)/launch/navigation.launch" />
+</launch>

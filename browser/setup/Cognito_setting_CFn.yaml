@@ -1,0 +1,75 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Description: AWS IoT Browser Sample
+
+Resources:
+#cognito
+  DeviceUserPool:
+    Type: AWS::Cognito::UserPool
+    Properties:
+      UserPoolName: !Join ["_", [!Ref "AWS::StackName", "Users"]]
+      AdminCreateUserConfig:
+        AllowAdminCreateUserOnly: false        
+
+  IdentityPool:
+    Type: AWS::Cognito::IdentityPool
+    Properties:
+      AllowUnauthenticatedIdentities: true
+      IdentityPoolName: !Join ["_", [!Ref "AWS::StackName", "UsersIds"] ]
+      DeveloperProviderName: "idpool"
+      CognitoIdentityProviders:
+        - ClientId: !Join ["_", [!Ref "AWS::StackName", "Users"] ]
+          ProviderName: !Join ["", ["cognito-idp.", Ref: "AWS::Region", ".amazonaws.com/", Ref: DeviceUserPool] ]
+
+  UnauthenticatedPolicy:
+    Type: AWS::IAM::ManagedPolicy
+    Properties:
+      PolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action:
+          - mobileanalytics:PutEvents
+          - cognito-sync:*
+          - iot:Connect
+          - iot:Receive
+          - iot:Subscribe
+          - iot:Publish
+          - iot:GetThingShadow
+          Resource:
+          - "*"
+
+  UnauthenticatedRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument:
+        Version: "2012-10-17"
+        Statement:
+        - Effect: Allow
+          Action: "sts:AssumeRoleWithWebIdentity"
+          Principal:
+            Federated: cognito-identity.amazonaws.com
+          Condition:
+            StringEquals:
+              "cognito-identity.amazonaws.com:aud":
+                Ref: IdentityPool
+            ForAnyValue:StringLike:
+              "cognito-identity.amazonaws.com:amr": unauthenticated
+      ManagedPolicyArns:
+      - Ref: UnauthenticatedPolicy
+
+  RoleAttachment:
+    Type: AWS::Cognito::IdentityPoolRoleAttachment
+    Properties:
+      IdentityPoolId:
+        Ref: IdentityPool
+      Roles:
+        unauthenticated:
+          Fn::GetAtt:
+          - UnauthenticatedRole
+          - Arn
+
+# outputs
+Outputs:
+  IdentityPoolID:
+    Value: !Ref IdentityPool
