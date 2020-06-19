@@ -32,8 +32,8 @@ import time
 
 LINERAR_SPEED = 0.1
 LINEAR_STEP = 0.1 / 3
-ANGULER_SPEED = 0.5
-ANGULER_STEP = 0.5 / 3
+ANGULER_SPEED = 0.3
+ANGULER_STEP = 0.3 / 3
 
 class RemoteController():
     def __init__(self):
