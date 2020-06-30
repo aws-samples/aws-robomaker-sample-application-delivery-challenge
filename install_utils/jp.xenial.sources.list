@@ -1,0 +1,26 @@
+# x86 Support
+deb [arch=amd64,i386] http://jp.archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse
+deb [arch=amd64,i386] http://jp.archive.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb [arch=amd64,i386] http://jp.archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb [arch=amd64,i386] http://archive.ubuntu.com/ubuntu/ xenial-security main restricted universe multiverse
+
+
+# ARM Support
+
+deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports/ xenial main restricted universe multiverse
+deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports/ xenial-updates main restricted universe multiverse
+deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports/ xenial-backports main restricted
+deb [arch=armhf,arm64] http://ports.ubuntu.com/ubuntu-ports/ xenial-security main restricted universe multiverse
+
+# Source Repositories
+
+deb-src http://jp.archive.ubuntu.com/ubuntu/ xenial main restricted universe multiverse
+deb-src http://jp.archive.ubuntu.com/ubuntu/ xenial-updates main restricted universe multiverse
+deb-src http://jp.archive.ubuntu.com/ubuntu/ xenial-backports main restricted universe multiverse
+deb-src http://archive.ubuntu.com/ubuntu/ xenial-security main restricted universe multiverse
+
+# ROS
+deb http://packages.ros.org/ros/ubuntu xenial main
+
+# OSRF - Gazebo
+deb http://packages.osrfoundation.org/gazebo/ubuntu-stable xenial main

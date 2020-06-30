@@ -280,7 +280,14 @@ class Setup:
                 sys.exit(1)
                 
             log("Setp 3. simulation_ws bundle...")
-            result = subprocess.call("colcon bundle".split())
+            if self.settings["aws_region"] == "ap-northeast-1":
+                # Running in Tokyo region. Use JP mirror for ubuntu packge file.
+                if self.settings["ros_version"] == "Melodic":
+                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.bionic.sources.list".split())
+                else:
+                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.xenial.sources.list".split())
+            else:
+                result = subprocess.call("colcon bundle".split())
             if result == 0:
                 log(" =>OK")
             else:
@@ -308,7 +315,14 @@ class Setup:
                 sys.exit(1)
                 
             log("Setp 6. robot_ws bundle...")
-            result = subprocess.call("colcon bundle".split())
+            if self.settings["aws_region"] == "ap-northeast-1":
+                # Running in Tokyo region. Use JP mirror for ubuntu packge file.
+                if self.settings["ros_version"] == "Melodic":
+                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.bionic.sources.list".split())
+                else:
+                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.xenial.sources.list".split())
+            else:
+                result = subprocess.call("colcon bundle".split())
             if result == 0:
                 log(" =>OK")
             else:
