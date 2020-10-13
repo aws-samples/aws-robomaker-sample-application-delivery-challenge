@@ -24,7 +24,7 @@ Resources:
                   - sts:AssumeRole
           ManagedPolicyArns:
             - 'arn:aws:iam::aws:policy/CloudWatchFullAccess'
-            - 'arn:aws:iam::aws:policy/AWSRoboMakerFullAccess'
+            - 'arn:aws:iam::aws:policy/AWSRoboMaker_FullAccess'
             - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
 
     RoboMakerDeliveryChallengeDeploymentRole:
@@ -47,7 +47,7 @@ Resources:
             - 'arn:aws:iam::aws:policy/service-role/AWSGreengrassResourceAccessRolePolicy'
             - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
             - 'arn:aws:iam::aws:policy/CloudWatchFullAccess'
-            - 'arn:aws:iam::aws:policy/AWSRoboMakerFullAccess'
+            - 'arn:aws:iam::aws:policy/AWSRoboMaker_FullAccess'
 
     RoboMakerDeliveryChallengeIoTIAMRole:
         Type: 'AWS::IAM::Role'
