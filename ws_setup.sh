@@ -20,9 +20,9 @@ sudo apt-get update
 source /opt/ros/$ROS_DISTRO/setup.sh
 rosdep update
 
-sudo pip3 install -U awscli
-sudo pip3 install -U colcon-common-extensions colcon-ros-bundle
-sudo pip3 install boto3
+pip3 install -U awscli
+pip3 install -U colcon-common-extensions colcon-ros-bundle colcon-bundle
+pip3 install boto3
 
 STACK_NAME1=deliverychallenge`echo $C9_USER|tr -d [\.\\-=_]` 
 STACK_NAME2=deliverychallengecognito`echo $C9_USER|tr -d [\.\\-=_]` 
