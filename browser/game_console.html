@@ -38,23 +38,26 @@
   left: 10px;
   font-size: 15px
 }
-.background .whiteboard .name_status {
+
+.background .whiteboard .team_email {
   position: absolute;
   top: 35px;
   left: 10px;
-  font-size: 15px;
-  width: 280px;
-  border-bottom:#242F3E 2px solid 
+  font-size: 15px
 }
-.background .whiteboard .name_time {
+
+.background .whiteboard .team_email_input {
   position: absolute;
-  top: 65px;
+  top: 62px;
   left: 10px;
-  font-size: 15px;
-  width: 280px;
-  border-bottom:#242F3E 2px solid 
 }
-.background .whiteboard .name_distance {
+
+.background .whiteboard .input_field {
+  width: 270px;
+  font-size: 15px
+}
+
+.background .whiteboard .name_status {
   position: absolute;
   top: 95px;
   left: 10px;
@@ -62,9 +65,25 @@
   width: 280px;
   border-bottom:#242F3E 2px solid 
 }
+.background .whiteboard .name_time {
+  position: absolute;
+  top: 125px;
+  left: 10px;
+  font-size: 15px;
+  width: 280px;
+  border-bottom:#242F3E 2px solid 
+}
+.background .whiteboard .name_distance {
+  position: absolute;
+  top: 155px;
+  left: 10px;
+  font-size: 15px;
+  width: 280px;
+  border-bottom:#242F3E 2px solid 
+}
 .background .whiteboard .value_status {
   position: absolute;
-  top: 35px;
+  top: 95px;
   left: 150px;
   vertical-align: text-top;
   width: 140px;
@@ -73,7 +92,7 @@
 }
 .background .whiteboard .value_time {
   position: absolute;
-  top: 65px;
+  top: 125px;
   left: 150px;
   width: 140px;
   font-size: 15px;
@@ -81,11 +100,19 @@
 }
 .background .whiteboard .value_distance {
   position: absolute;
-  top: 95px;
+  top: 155px;
   left: 150px;
   width: 140px;
   font-size: 15px;
   text-align: right;
+}
+.background .whiteboard .value_game_id {
+  position: absolute;
+  top: 185px;
+  left: 15px;
+  width: 300px;
+  font-size: 15px;
+  text-align: left;
 }
 .background .whiteboard .top {
   display: -webkit-box;
@@ -94,7 +121,7 @@
 }
 .start_button {
   position: absolute;
-  top: 150px;
+  top: 210px;
   left: 10px;
   width: 280px;
   height: 70px;
@@ -113,6 +140,10 @@
 .button:active {
   box-shadow: 0 1px 0 rgba(136,136,136,1);
 }
+.button:disabled {
+  color: #aaa;
+}
+
 </style>
 </head>
 <body>
@@ -120,13 +151,18 @@
   <div class="title_logo"><img class="title_img" src="img/logo.png"></div>
   <div class="whiteboard">
     <div class="title_text">AWS Robot Delivery Challenge</div>
-    <div class="name_status">Status</div>
-    <div class="name_time">Time</div>
-    <div class="name_distance">Distance to Goal</div>
+
+    <div class="team_email">チーム代表のEmailアドレス</div>
+    <div class="team_email_input"><input class="input_field" type="text" v-model="team_email" @blur="team_email_focus_out()" @keyup.enter="team_email_enter()" v-bind:disabled="isGameReady" ></div>
+
+    <div class="name_status">ステータス</div>
+    <div class="name_time">時間</div>
+    <div class="name_distance">ゴールまでの距離</div>
     <div class="value_status">{{ STATUS }}</div>
     <div class="value_time">{{ LAPTIME }}</div>
     <div class="value_distance">{{ DISTANCE }}</div>
-    <div><button class="button start_button" @click="start_game()">Start</font></button></div>
+    <div class="value_game_id">{{ GAMEID }}</div>
+    <div><button class="button start_button" @click="start_game()" v-bind:disabled="! isGameReady">Start</font></button></div>
   </div>
 </div>
 </body>

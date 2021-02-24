@@ -5,14 +5,14 @@
       <collision name="collision">
         <geometry>
           <mesh>
-            <uri>model://meshes/course1.dae</uri>
+            <uri>file://playroom/meshes/course1.dae</uri>
           </mesh>
         </geometry>
       </collision>
       <visual name="visual">
         <geometry>
           <mesh>
-            <uri>model://meshes/course1.dae</uri>
+            <uri>file://playroom/meshes/course1.dae</uri>
           </mesh>
         </geometry>
       </visual>

@@ -72,12 +72,12 @@ class RemoteController():
         elif self.action == 'left':
             self.twist.angular.z = min([ANGULER_SPEED, self.twist.angular.z + ANGULER_STEP])
             self.is_moving = True
-        if self.action == 'stop' or self.action == 'right' or self.action == 'left':
+        if self.action == 'stop' or self.action == 'right' or self.action == 'left' or self.action == 'auto':
             if self.twist.linear.x > 0:
                 self.twist.linear.x = max([0, self.twist.linear.x - LINEAR_STEP])
             elif self.twist.linear.x < 0:
                 self.twist.linear.x = min([0, self.twist.linear.x + LINEAR_STEP])
-        if self.action == 'stop' or self.action == 'forward' or self.action == 'backward':
+        if self.action == 'stop' or self.action == 'forward' or self.action == 'backward' or self.action == 'auto':
             if self.twist.angular.z > 0:    
                 self.twist.angular.z = max([0, self.twist.angular.z - ANGULER_STEP])
             elif self.twist.angular.z < 0:    
@@ -93,10 +93,15 @@ class RemoteController():
         try:
             message_json = json.loads(message.data)
             payload = message_json['payload']
-            if 'command' in payload and payload['command'] == "move":
-                rospy.loginfo("remote_controller Move {}".format(payload['action']))
-                self.action = payload['action']
-                self.sync_action()
+            if 'command' in payload: 
+                if payload['command'] == "move":
+                    rospy.loginfo("remote_controller Move {}".format(payload['action']))
+                    self.action = payload['action']
+                    self.sync_action()
+                elif payload['command'] == "navigation":
+                    rospy.loginfo("remote_controller Move {}".format(payload['action']))
+                    self.action = "auto"
+                
         except Exception as e:
             rospy.logwarn(e)
 

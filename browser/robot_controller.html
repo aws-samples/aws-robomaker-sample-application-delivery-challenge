@@ -5,64 +5,193 @@
     <title>AWS Devliery Challenge Sample Web page</title>
     <script src="js/aws-iot-sdk-browser-bundle.js"></script>
     <script src="https://sdk.amazonaws.com/js/aws-sdk-2.283.1.min.js"></script>
-    <script src='https://cdnjs.cloudflare.com/ajax/libs/vue/2.5.22/vue.min.js'></script>
+    <script src="https://unpkg.com/react@16/umd/react.production.min.js"></script>
+    <script src="https://unpkg.com/react-dom@16/umd/react-dom.production.min.js"></script>
+    <script src="https://unpkg.com/babel-standalone@6.15.0/babel.min.js"></script>
+
+    
     <link rel="stylesheet" type="text/css" href="css/controller_style.css">
 </head>
 <body>
-<div class="background" id="app">
-  <div class="whiteboard">
-      <div class="top">
-          <div class="controller">
-            <div class="forward">
-              <button class="button move_button" @mousedown="move_forward_down()" @mouseup="move_forward_up()" >↑</font></button>
-            </div>
-            <div class="left">
-              <button class="button move_button"  @mousedown="move_left_down()" @mouseup="move_left_up()">←</font></button> 
-            </div>
-            <div class="stop">
-              <button class="button move_button"  @mousedown="move_stop_down()" @mouseup="move_stop_up()">・</font></button>
-            </div>
-            <div class="right">
-              <button class="button move_button"  @mousedown="move_right_down()" @mouseup="move_right_up()">→</font></button>
-            </div>
-            <div class="backward">
-              <button class="button move_button"  @mousedown="move_backward_down()" @mouseup="move_backward_up()">↓</font></button>
-            </div>
-          </div>
-          <div class="location">
-            <div class="title">Location</div>
-            <div class="name">Odometry</div>
-            <div class="odom_x">x</div>
-            <div class="odom_y">y</div>
-            <div class="odom_z">z</div>
-            <div class="odom_heading">heading</div>
-            <div class="odom_value_x">{{ ODOM_X }}</div>
-            <div class="odom_value_y">{{ ODOM_Y }}</div>
-            <div class="odom_value_z">{{ ODOM_Z }}</div>
-            <div class="odom_value_heading">{{ ODOM_ORIENTATION }}</div>
-          </div>
-    </div>
-    <div class="bottom">
+  <div class="background" id="app" />
+</body>
+
+<script src="js/app-settings.js"></script>
+<script src="js/app.js"></script>
+<script type="text/babel"">
+
+var NavigationControlInstance;
+
+var move_forward_down = function () {console.log("move_forward pressed"); MoveAction = "forward"; SyncJobFunction()};
+var move_forward_up = function () {console.log("move_forward released"); MoveAction = "";};
+var move_left_down = function () {console.log("move_left pressed"); MoveAction = "left"; SyncJobFunction()};
+var move_left_up = function () {console.log("move_left released"); MoveAction = "";};
+var move_right_down = function () {console.log("move_right pressed"); MoveAction = "right"; SyncJobFunction()};
+var move_right_up = function () {console.log("move_right released"); MoveAction = "";};
+var move_backward_down = function () {console.log("move_backward pressed"); MoveAction = "backward"; SyncJobFunction()};
+var move_backward_up = function () {console.log("move_backward released"); MoveAction = "";};
+var move_stop_down = function () {console.log("move_stop pressed"); MoveAction = "stop"; SyncJobFunction()};
+var move_stop_up = function () {console.log("move_stop released"); MoveAction = "";};
+var map_save = function () { SaveMapFunction(); }
+var go_to_target = function() { GoToTargetFunction(NavigationControlInstance.state.x, NavigationControlInstance.state.y, NavigationControlInstance.state.heading) }
+
+window.document.onkeydown = function(event){
+  switch(event.key) {
+    case "ArrowUp":
+      MoveAction = "forward"; SyncJobFunction();
+      break;
+    case "ArrowDown":
+      MoveAction = "backward"; SyncJobFunction();
+      break;
+    case "ArrowLeft":
+      MoveAction = "left"; SyncJobFunction();
+      break;
+    case "ArrowRight":
+      MoveAction = "right"; SyncJobFunction();
+      break;
+    case "g":
+    case "G":
+      GoToTargetFunction(NavigationControlInstance.state.x, NavigationControlInstance.state.y, NavigationControlInstance.state.heading);
+      break; 
+  }
+}
+
+window.document.onkeyup = function(event){
+  switch(event.key) {
+    case "ArrowUp":
+    case "ArrowDown":
+    case "ArrowLeft":
+    case "ArrowRight":
+      MoveAction = "stop"; SyncJobFunction();
+      break;
+  }
+}
+
+class Controller extends React.Component {
+  render() {
+    return (
+      <div class="controller">
+        <div class="forward">
+          <button class="button move_button" onMouseDown={move_forward_down} onMouseUp={move_forward_up} >↑</button>
+        </div>
+        <div class="left">
+          <button class="button move_button"  onMouseDown={move_left_down} onMouseUp={move_left_up}>←</button> 
+        </div>
+        <div className="stop">
+          <button class="button move_button"  onMouseDown={move_stop_down} onMouseUp={move_stop_up}>・</button>
+        </div>
+        <div className="right">
+          <button class="button move_button"  onMouseDown={move_right_down} onMouseUp={move_right_up}>→</button>
+        </div>
+        <div className="backward">
+          <button class="button move_button"  onMouseDown={move_backward_down} onMouseUp={move_backward_up}>↓</button>
+        </div>
+      </div>
+    );
+  }
+}
+
+class Odometry extends React.Component {
+  constructor(props) {
+    super(props);
+    OdometryControlInstance = this;
+    this.state = { x: 0, y:0, z:0, h:0 };
+  }  
+  render() {
+    return (
+      <div class="location">
+        <div class="title">Location</div>
+        <div class="name">Odometry</div>
+        <div class="odom_x">x</div>
+        <div class="odom_y">y</div>
+        <div class="odom_z">z</div>
+        <div class="odom_heading">heading</div>
+        <div class="odom_value_x">{this.state.x}</div>
+        <div class="odom_value_y">{this.state.y}</div>
+        <div class="odom_value_z">{this.state.z}</div>
+        <div class="odom_value_heading">{this.state.h}</div>
+      </div>
+    );
+  }
+}
+
+class Navigation extends React.Component {
+  constructor(props) {
+    super(props);
+    NavigationControlInstance = this;
+    this.state = { x: 0, y:0, heading:0 };
+  }  
+  render() {
+    return (
       <div class="goal">
         <div class="title_goal">Goal</div>
         <div class="goal_x">x</div>
         <div class="goal_y">y</div>
         <div class="goal_heading">heading</div>
-        <div class="goal_value_x"><input class="input_field" type="text" v-model="target_x"></div>
-        <div class="goal_value_y"><input class="input_field" type="text" v-model="target_y"></div>
-        <div class="goal_value_heading"><input class="input_field" type="text" v-model="target_orientation"></div>
-        <div class="goal_button"><button class="button action_button" @click="go_to_target()">Go To</button></div>
+        <div class="goal_value_x"><input class="input_field" type="text" onChange={this.onChangeGoalX} value={this.state.x} /></div>
+        <div class="goal_value_y"><input class="input_field" type="text" onChange={this.onChangeGoalY} value={this.state.y} /></div>
+        <div class="goal_value_heading"><input class="input_field" type="text" onChange={this.onChangeGoalHeading} value={this.state.heading} /></div>
+        <div class="goal_button"><button class="button action_button" onClick={go_to_target}>[G]o To</button></div>
       </div>
+    );
+  }
+
+  onChangeGoalX(e) {
+    NavigationControlInstance.setState({x: e.target.value});
+  }
+  onChangeGoalY(e) {
+    NavigationControlInstance.setState({y: e.target.value});
+  }
+  onChangeGoalHeading(e) {
+    NavigationControlInstance.setState({heading: e.target.value});
+  }
+}
+
+class SaveMap extends React.Component {
+  render() {
+    return (
       <div class="save">
         <div class="save_button">
-          <button class="button action_button" @click="map_save()">Save Map</button> 
+          <button class="button action_button" onClick={map_save}>Save Map</button> 
         </div>
       </div>
-    </div>
-  </div>
-</body>
+    );
+  }
+}
 
-<script src="js/app-settings.js"></script>
-<script src="js/app.js"></script>
+
+class GameBoard extends React.Component {
+  render() {
+    return (
+        <div class="whiteboard">
+            <div className="top">
+                <Controller/>
+                <Odometry/>
+          </div>
+          <div class="bottom">
+            <Navigation/>
+            <SaveMap/>
+          </div>
+        </div>
+    );
+  }
+}
+
+// ========
+
+ReactDOM.render(
+<GameBoard />,
+document.getElementById('app')
+);
+
+if (typeof iotendpoint == "undefined") {
+  let lang = (window.navigator.languages && window.navigator.languages[0]) || window.navigator.language || window.navigator.userLanguage || window.navigator.browserLanguage;
+  if (lang == "ja") {
+    alert("Webインターフェースエラー！設定が見つかりません。次を確認してください。(1) ビルド完了後にファイルをインストールしましたか？ 再度ビルド環境からファイルをダウンロードしてみてください (2) ファイルは展開していますか？ダウンロードしたファイルはローカル環境で解凍され、展開されている必要があります");
+  } else {
+    alert("No setting file found. Failed to launch the web interface. Please check (1) If you download the file after finishing the build step on your development env. Please download again if you don't. (2) If the file is extracted on your PC. If the file is not extracted, please extract it and try again.")
+  }
+}
+</script>
 
 </html>

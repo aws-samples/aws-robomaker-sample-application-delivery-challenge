@@ -16,8 +16,9 @@
   <depend>turtlebot3_simulations</depend>
   <depend>turtlebot3_description</depend>
   <exec_depend>gazebo</exec_depend>
-  
+  <exec_depend>boto3</exec_depend>
+
   <export>
-   <gazebo_ros gazebo_model_path="${prefix}" />  
+   <gazebo_ros gazebo_model_path="${prefix}:${prefix}/models" gazebo_resource_path="${prefix}:${prefix}/models" gazebo_media_path="${prefix}:${prefix}/models" />  
   </export>
 </package>

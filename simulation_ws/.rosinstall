@@ -1,0 +1,2 @@
+# Amazon ROS CloudServiceIntegration package dependencies
+- git: {local-name: src/turtlebot3-description-reduced-mesh, uri: "https://github.com/aws-robotics/turtlebot3-description-reduced-mesh.git", version: "ros1"}

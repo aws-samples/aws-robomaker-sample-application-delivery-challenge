@@ -38,6 +38,7 @@ from geometry_msgs.msg import Quaternion
 class Navigation():
     def __init__(self):
         self._remote_sub = rospy.Subscriber('/awsiot_to_ros', String, self.awsiot_to_ros_cb, queue_size=1)
+        self._in_nav = False
 
     def main(self):
         rospy.spin()
@@ -71,6 +72,17 @@ class Navigation():
                     goal_pose.target_pose.pose.orientation = Quaternion(x=q[0], y=q[1], z=q[2], w=q[3])
 
                     client.send_goal(goal_pose)
+                    self._in_nav = True
+            else:
+                rospy.logwarn("-------------- non navigation command -------")
+                
+                if self._in_nav:
+                    rospy.logwarn("-------------- going to cancel all goals -------")
+                    client = actionlib.SimpleActionClient('move_base', MoveBaseAction)
+                    client.wait_for_server()
+                    client.cancel_all_goals()
+                    rospy.logwarn("-------------- cancel all goals done-------")
+                    self._in_nav = None
 
         except Exception as e:
             rospy.logwarn("navigation request failed")

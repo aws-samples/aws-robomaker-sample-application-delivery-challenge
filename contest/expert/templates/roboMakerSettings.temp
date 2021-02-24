@@ -1,0 +1,152 @@
+{
+  "runConfigurations": [
+    {
+      "id": "DeliveryChallenge_Cfg03",
+      "name": "Delivery Challenge robot",
+      "type": "colcon build",
+      "cfg": {
+        "workingDir": "./<project_dir2>/robot_ws",
+        "cmdArgs": ""
+      }
+    },
+    {
+      "id": "DeliveryChallenge_Cfg04",
+      "name": "Delivery Challenge robot",
+      "type": "colcon bundle",
+      "cfg": {
+        "workingDir": "./<project_dir2>/robot_ws",
+        "cmdArgs": ""
+      }
+    },
+    {
+      "id": "DeliveryChallenge_SimulationJob1",
+      "name": "Delivery Challenge Navigation",
+      "type": "simulation",
+      "cfg": {
+        "simulationApp": {
+          "name": "<simulation_app_name>",
+          "sourceBundleFile": "./<project_dir2>/simulation_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "s3Bucket": "<bucket_name>",
+          "launchConfig": {
+            "packageName": "delivery_challenge_contest",
+            "launchFile": "create_stage.launch",
+            "environmentVariables": {
+              "TURTLEBOT3_MODEL": "burger" 
+            }
+          },
+          "simulationSoftwareSuite": {
+            "name": "Gazebo",
+            "version": "<gazebo_version>"
+          },
+          "renderingEngine": {
+            "name": "OGRE",
+            "version": "1.x"
+          },
+          "robotSoftwareSuite": {
+            "name": "ROS",
+            "version": "<ros_version>"
+          }
+        },
+        "robotApp": {
+          "name": "<robot_app_name>",
+          "s3Bucket": "<bucket_name>",
+          "sourceBundleFile": "./<project_dir2>/robot_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "robotSoftwareSuite": {
+            "version": "<ros_version>",
+            "name": "ROS"
+          },
+          "launchConfig": {
+            "packageName": "delivery_robot_sample",
+            "launchFile": "navigation_simulation.launch",
+            "environmentVariables": {
+            },
+            "streamUI": true
+          }
+        },
+        "simulation": {
+          "maxJobDurationInSeconds": 1800,
+          "failureBehavior": "Fail",
+          "iamRole": "<iam_role>",
+          "vpcConfig": {
+            "securityGroups": <security_groups>,
+            "subnets": <subnets>,
+            "assignPublicIp": true
+          },
+          "tags": {}
+        }
+      }
+    },  
+    {
+      "id": "DeliveryChallenge_SimulationJob2",
+      "name": "Delivery Challenge SLAM",
+      "type": "simulation",
+      "cfg": {
+        "simulationApp": {
+          "name": "<simulation_app_name>",
+          "sourceBundleFile": "./<project_dir2>/simulation_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "s3Bucket": "<bucket_name>",
+          "launchConfig": {
+            "packageName": "delivery_challenge_contest",
+            "launchFile": "create_stage0.launch",
+            "environmentVariables": {
+              "TURTLEBOT3_MODEL": "burger" 
+            }
+          },
+          "simulationSoftwareSuite": {
+            "name": "Gazebo",
+            "version": "<gazebo_version>"
+          },
+          "renderingEngine": {
+            "name": "OGRE",
+            "version": "1.x"
+          },
+          "robotSoftwareSuite": {
+            "name": "ROS",
+            "version": "<ros_version>"
+          }
+        },
+        "robotApp": {
+          "name": "<robot_app_name>",
+          "s3Bucket": "<bucket_name>",
+          "sourceBundleFile": "./<project_dir2>/robot_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "robotSoftwareSuite": {
+            "version": "<ros_version>",
+            "name": "ROS"
+          },
+          "launchConfig": {
+            "packageName": "delivery_robot_sample",
+            "launchFile": "slam_simulation.launch",
+            "environmentVariables": {
+              "TURTLEBOT3_MODEL": "burger" 
+            },
+            "streamUI": true
+          }
+        },
+        "simulation": {
+          "maxJobDurationInSeconds": 5400,
+          "failureBehavior": "Fail",
+          "iamRole": "<iam_role>",
+          "vpcConfig": {
+            "securityGroups": <security_groups>,
+            "subnets": <subnets>,
+            "assignPublicIp": true
+          },
+          "tags": {}
+        }
+      }
+    },
+    {
+      "id": "fc7f3c40-0440-afb2-897a-dc41ee389c3a",
+      "name": "Delivery Challenge Robot app build -> bundle",
+      "type": "workflow",
+      "runCfgIds": [
+        "DeliveryChallenge_Cfg03",
+        "DeliveryChallenge_Cfg04"
+      ]
+    }
+  ]
+}

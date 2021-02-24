@@ -1,0 +1,111 @@
+Description: 
+
+    This template deploys the required resources for AWS Robot Delivery Challenge sample application. 
+
+
+Resources:
+
+    RoboMakerDeliveryChallengeS3Bucket:
+        Type: AWS::S3::Bucket
+
+    RoboMakerDeliveryChallengeSimulationRole:
+        Type: 'AWS::IAM::Role'
+        Properties:
+          RoleName: !Sub delivery-challenge-simulation-role-${AWS::Region}
+          AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Principal:
+                  Service:
+                    - robomaker.amazonaws.com
+                Action:
+                  - sts:AssumeRole
+          ManagedPolicyArns:
+            - 'arn:aws:iam::aws:policy/CloudWatchFullAccess'
+            - 'arn:aws:iam::aws:policy/AWSRoboMaker_FullAccess'
+            - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+
+    RoboMakerDeliveryChallengeDeploymentRole:
+        Type: 'AWS::IAM::Role'
+        Properties:
+          RoleName: !Sub delivery-challenge-deployment-role-${AWS::Region}
+          AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Principal:
+                  Service:
+                    - lambda.amazonaws.com
+                    - iot.amazonaws.com
+                    - greengrass.amazonaws.com
+                Action:
+                  - 'sts:AssumeRole'
+          ManagedPolicyArns:
+            - 'arn:aws:iam::aws:policy/service-role/AWSGreengrassResourceAccessRolePolicy'
+            - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+            - 'arn:aws:iam::aws:policy/CloudWatchFullAccess'
+            - 'arn:aws:iam::aws:policy/AWSRoboMaker_FullAccess'
+
+    RoboMakerDeliveryChallengeIoTIAMRole:
+        Type: 'AWS::IAM::Role'
+        Properties:
+          RoleName: !Sub delivery-challenge-iot-role-${AWS::Region}
+          AssumeRolePolicyDocument:
+            Version: 2012-10-17
+            Statement:
+              -
+                Effect: Allow
+                Principal:
+                  Service:
+                    - credentials.iot.amazonaws.com
+                Action:
+                  - sts:AssumeRole
+          ManagedPolicyArns:
+            - 'arn:aws:iam::aws:policy/AmazonS3FullAccess'
+            
+    RoboMakerDeliveryChallengeThing:
+        Type: AWS::IoT::Thing
+
+    RoboMakerDeliveryChallengeIoTPolicy:
+        Type: AWS::IoT::Policy
+        Properties: 
+            PolicyDocument: '{ 
+                "Version": "2012-10-17",
+                "Statement": [{ 
+                    "Effect": "Allow", 
+                    "Action":["iot:*"], 
+                    "Resource": ["*"] 
+                }]}' 
+
+Outputs: 
+  
+    RoboMakerS3Bucket:
+        Description: The S3 bucket used to store your AWS RoboMaker assets.
+        Value: !Ref RoboMakerDeliveryChallengeS3Bucket
+
+    SimulationRole:
+        Description: The IAM role that the simulation application will use to access AWS resources.
+        Value: !GetAtt RoboMakerDeliveryChallengeSimulationRole.Arn
+        
+    DeploymentRole:
+        Description: The IAM role that the robot will use to access AWS resources.
+        Value: !GetAtt RoboMakerDeliveryChallengeDeploymentRole.Arn
+
+    Thing:
+        Description: IoT Thing associated with the robot application. 
+        Value: !Ref RoboMakerDeliveryChallengeThing
+
+    IoTPolicy:
+        Description: IoT Thing policy associated with the robot application. 
+        Value: !GetAtt RoboMakerDeliveryChallengeIoTPolicy.Arn
+
+    IoTIAMRole:
+        Description: IAM role associated with iam role alias. 
+        Value: !GetAtt RoboMakerDeliveryChallengeIoTIAMRole.Arn
+
+
+
+

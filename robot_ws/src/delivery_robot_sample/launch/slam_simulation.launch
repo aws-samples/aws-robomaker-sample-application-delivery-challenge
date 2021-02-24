@@ -1,0 +1,7 @@
+<launch>
+  <arg name="use_sim_time" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  
+  <include file="$(find delivery_robot_sample)/launch/controller.launch" />
+  <include file="$(find delivery_robot_sample)/launch/slam.launch" />
+</launch>

@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.6" encoding="utf-8"?>
 <!-- Copy of turtlebot3_gazebo/worlds/empty.world with fixes
      
      Changes:
@@ -78,20 +78,106 @@
       <pose>0.604890 0.715556 0 0 0 0</pose>
       <name>unit_cylinder3</name>
     </include>
-    <include>
-      <uri>model://models/bus1</uri>
-      <pose>3.759249 0.219470 0 0 -0 -3.033658</pose>
-      <name>bus1</name>
-    </include>
-    <include>
-      <uri>model://models/bus1</uri>
-      <pose>0.272019 1.98431 0 0 -0 0.515618</pose>
-      <name>bus2</name>
-    </include>
-    <include>
-      <uri>model://models/bus1</uri>
+    
+    <model name="bus1">
+      <include>
+        <uri>model://models/bus1</uri>
+      </include>
+      <plugin name="pose_animation_plugin" filename="libpose_animation_plugin.so">
+        <!-- 
+          Define the trajectory here.  
+
+          Format:
+          <total_time>total time in sec</total_time>
+          <repeat>true</repeat>
+          <key1><time>time in sec</time><pose>x y z roll pitck yaw</pose></key1>
+          <key2><time>time in sec</time><pose>x y z roll pitck yaw</pose></key2>
+          ...
+          
+          Example:
+          <total_time>10</total_time>
+          <repeat>true</repeat>
+          <key1>
+            <time>0</time>
+            <pose>2 1.4 0 0 0 0</pose>
+          </key1>
+          <key2>
+            <time>4</time>
+            <pose>3 1.4 0 0 0 0</pose>
+          </key2>
+          <key3>
+            <time>8</time>
+            <pose>2 1.4 0 0 0 0</pose>
+          </key3>
+        --> 
+        
+        <total_time>28</total_time>
+        <repeat>true</repeat>
+        <key1>
+          <time>0</time>
+          <pose>2.2 1.45 0 0 0 0</pose>
+        </key1>
+        <key2>
+          <time>4</time>
+          <pose>2.8 1.45 0 0 0 0</pose>
+        </key2>
+        <key3>
+          <time>7</time>
+          <pose>3.0 1.6 0 0 0 1.5707</pose>
+        </key3>
+        <key4>
+          <time>10</time>
+          <pose>3.0 2.2 0 0 0 1.5707</pose>
+        </key4>
+
+        <key5>
+          <time>15</time>
+          <pose>3.0 2.2 0 0 0 1.5707</pose>
+        </key5>
+
+        <key6>
+          <time>18</time>
+          <pose>3.0 1.6 0 0 0 1.5707</pose>
+        </key6>
+        <key7>
+          <time>21</time>
+          <pose>2.8 1.45 0 0 0 0</pose>
+        </key7>
+        <key8>
+          <time>25</time>
+          <pose>2.2 1.45 0 0 0 0</pose>
+        </key8>
+      </plugin> 
+    </model>
+    
+    <model name="bus2">
+      <include>
+        <uri>model://models/bus1</uri>
+      </include>
+      <plugin name="pose_animation_plugin" filename="libpose_animation_plugin.so">
+        <repeat>true</repeat>
+        <total_time>20</total_time>
+        <key1>
+          <time>0</time>
+          <pose>2.7 0.053 0 0 0 0.087646</pose>
+        </key1>
+        <key2>
+          <time>8</time>
+          <pose>5.395567 0.324643 0 0 0 0.087646</pose>
+        </key2>
+        <key3>
+          <time>16</time>
+          <pose>2.7 0.053 0 0 0 0.087646</pose>
+        </key3>
+      </plugin> 
+    </model>
+
+    <model name="bus3">
+      <include>
+        <uri>model://models/bus1</uri>
+      </include>
       <pose>4.33532 2.22348 0 0 0 -1.56296</pose>
-      <name>bus3</name>
-    </include>
+    </model>
+  
   </world>
 </sdf>

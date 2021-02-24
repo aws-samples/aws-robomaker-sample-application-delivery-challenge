@@ -1,0 +1,64 @@
+{
+  "runConfigurations": [
+    {
+      "id": "DeliveryChallenge_SimulationJob1",
+      "name": "Delivery Challenge Navigation",
+      "type": "simulation",
+      "cfg": {
+        "simulationApp": {
+          "name": "<simulation_app_name>",
+          "sourceBundleFile": "./<project_dir2>/onemake_simulation_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "s3Bucket": "<bucket_name>",
+          "launchConfig": {
+            "packageName": "onemake_delivery_robot",
+            "launchFile": "navigation_simulation.launch",
+            "environmentVariables": {
+              "TURTLEBOT3_MODEL": "burger" 
+            },
+            "streamUI": true
+          },
+          "simulationSoftwareSuite": {
+            "name": "Gazebo",
+            "version": "<gazebo_version>"
+          },
+          "renderingEngine": {
+            "name": "OGRE",
+            "version": "1.x"
+          },
+          "robotSoftwareSuite": {
+            "name": "ROS",
+            "version": "<ros_version>"
+          }
+        },
+        "robotApp": {
+          "name": "<robot_app_name>",
+          "s3Bucket": "<bucket_name>",
+          "sourceBundleFile": "./<project_dir2>/onemake_robot_ws/bundle/output.tar",
+          "architecture": "X86_64",
+          "robotSoftwareSuite": {
+            "version": "<ros_version>",
+            "name": "ROS"
+          },
+          "launchConfig": {
+            "packageName": "aws_game_manager",
+            "launchFile": "game_manager_simulation.launch",
+            "environmentVariables": {
+            }
+          }
+        },
+        "simulation": {
+          "maxJobDurationInSeconds": 1800,
+          "failureBehavior": "Fail",
+          "iamRole": "<iam_role>",
+          "vpcConfig": {
+            "securityGroups": <security_groups>,
+            "subnets": <subnets>,
+            "assignPublicIp": true
+          },
+          "tags": {}
+        }
+      }
+    }
+  ]
+}

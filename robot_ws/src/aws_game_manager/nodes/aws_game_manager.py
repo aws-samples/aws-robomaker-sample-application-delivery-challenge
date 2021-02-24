@@ -19,7 +19,7 @@
 #
 
 # 
-# このノードは ROS アプリケーションと AWS IoTとを連携し、AWS Robot Delivery Challenge の予選リーグをコントロールします。
+# このノードは ROS アプリケーションと AWS IoTとを連携し、ロボットをコントロールします
 # AWS Robot Delivery Challenge の予選リーグ参加者はこのファイルを変更しないでください。
 # 
 
@@ -41,37 +41,20 @@ import time
 import threading
 import os
 
-INITIAL_POS_X = 0
-INITIAL_POS_Y = 0
-
-GOAL_POS_X = 5.0
-GOAL_POS_Y = 1.3
-GOAL_TOLERANCE = 0.1
-
-CHECK_RATE = 20
-UPDATE_INTERVAL = 5
-
-ROBOT_NAME="turtlebot3_burger"
 class GameManager:
     
     def __init__(self, aws_iot_client, config):
         
         self._iot_client = aws_iot_client
-        self._iot_client.set_game_command_cb(self._iot_command_cb)
+        self._iot_client.set_game_command_cb(self._gm_command_cb)
 
         self._isSimulation = rospy.get_param("use_sim_time")
         self._config = config
 
-        self._starttime = 0
-        self._finishtime = 0
-        self._distance = 100
-        self._time = 0
-        self._request_id = 0
-
         if self._isSimulation:
             try:
-                self._gazebo_model_set_state = rospy.ServiceProxy('/gazebo/set_model_state', SetModelState) 
-                self._gazebo_model_get_state = rospy.ServiceProxy('/gazebo/get_model_state', GetModelState)
+                self._gm_cmd = rospy.Publisher('/gm_cmd', String)
+                rospy.Subscriber('/gm_status', String, self._game_status_cb)               
             except Exception as e:
                 self._status = 'Failure'
                 rospy.logwarn(e)
@@ -113,99 +96,12 @@ class GameManager:
         rospy.loginfo("Update AWS IoT Credentials finished")
         return True
     
-    def _iot_command_cb(self, payload):
-        if "command" in payload and "action" in payload and "request_id" in payload:
-            if payload["command"] == "game" and payload["action"] == "start":
-                self._start_game(payload["request_id"])
+    def _gm_command_cb(self, payload):
+        self._gm_cmd.publish(json.dumps(payload))
 
-    def _game_thread(self, my_request_id):
-        rospy.logwarn("************* Start the game!!! ********* game id:{}".format(my_request_id))
-
-        self._request_id = my_request_id
-
-        if not self._isSimulation:
-            self._status = "Fail. Not simulation mode"
-            self._send_status()
-            return
-        else:
-            self._status = "Starting.."
-            self._send_status()
-
-            try:
-                rospy.wait_for_service('gazebo/get_model_state')
-            except Exception as e:
-                self._status = 'Failure'
-                rospy.logwarn(e)
-                self._send_status()
-                return
-
-            self._turtlebot3_reset()
-            self._starttime = rospy.Time.now()
-            self._status = 'Running'
-            rospy.logwarn("************* Start time {} *********".format(self._starttime))
-
-            r = rospy.Rate(CHECK_RATE)
-            cnt = UPDATE_INTERVAL
-            while not rospy.is_shutdown() and self._request_id == my_request_id:
-                model_state = self._gazebo_model_get_state(ROBOT_NAME,'world')
-
-                self._distance = math.sqrt((model_state.pose.position.x - GOAL_POS_X) ** 2 + (model_state.pose.position.y - GOAL_POS_Y) ** 2)
-                self._time = (rospy.Time.now() - self._starttime).to_sec()
-                if self._distance <= GOAL_TOLERANCE:
-                    self._status = "Finished"
-                    self._time = self._time
-                    self._send_status()
-                    break
-
-                cnt = cnt + 1
-                if cnt >= UPDATE_INTERVAL:
-                    cnt = 0
-                    self._send_status()
-    
-                r.sleep()
-
-            if self._request_id != my_request_id:
-                rospy.logwarn("Another game started.. canceling game id {} new_id {}".format(my_request_id, self._request_id))    
-
-    def _send_status(self):
-        try:
-            payload = {}
-            payload['command'] = "update"
-            payload['status'] = self._status
-            payload['distance'] = self._distance
-            payload['time'] = self._time 
-            self._iot_client.gm_to_awsiot_publisher(json.dumps(payload))
-        except Exception as e:
-            rospy.logwarn(e)
-
-    def _start_game(self, my_request_id):
-        thread = threading.Thread(target=self._game_thread,  args=(my_request_id,))
-        thread.start()
-
-    def _turtlebot3_reset(self):
-        if not self._isSimulation:
-            return
+    def _game_status_cb(self, message):
+        self._iot_client.gm_to_awsiot_publisher(message.data)
         
-        rospy.wait_for_service('gazebo/set_model_state')
-
-        # Put the turtlebot at the initial position
-        modelState = ModelState()
-        modelState.pose.position.z = 0
-        modelState.pose.position.x = INITIAL_POS_X
-        modelState.pose.position.y = INITIAL_POS_Y
-        modelState.pose.orientation.x = 0
-        modelState.pose.orientation.y = 0
-        modelState.pose.orientation.z = 0
-        modelState.pose.orientation.w = 0
-        modelState.twist.linear.x = 0
-        modelState.twist.linear.y = 0
-        modelState.twist.linear.z = 0
-        modelState.twist.angular.x = 0
-        modelState.twist.angular.y = 0
-        modelState.twist.angular.z = 0
-        modelState.model_name = ROBOT_NAME
-        self._gazebo_model_set_state(modelState)
-
 
 class MqttRos:
     AllowedActions = ['both', 'publish', 'subscribe']

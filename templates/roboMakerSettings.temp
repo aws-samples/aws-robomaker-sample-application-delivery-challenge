@@ -1,29 +1,11 @@
 {
   "runConfigurations": [
     {
-      "id": "DeliveryChallenge_Cfg01",
-      "name": "Delivery Challenge simulation",
-      "type": "colcon build",
-      "cfg": {
-        "workingDir": "./<project_dir>/simulation_ws",
-        "cmdArgs": ""
-      }
-    },
-    {
-      "id": "DeliveryChallenge_Cfg02",
-      "name": "Delivery Challenge simulation",
-      "type": "colcon bundle",
-      "cfg": {
-        "workingDir": "./<project_dir>/simulation_ws",
-        "cmdArgs": ""
-      }
-    },
-    {
       "id": "DeliveryChallenge_Cfg03",
       "name": "Delivery Challenge robot",
       "type": "colcon build",
       "cfg": {
-        "workingDir": "./<project_dir>/robot_ws",
+        "workingDir": "./<project_dir2>/robot_ws",
         "cmdArgs": ""
       }
     },
@@ -32,18 +14,18 @@
       "name": "Delivery Challenge robot",
       "type": "colcon bundle",
       "cfg": {
-        "workingDir": "./<project_dir>/robot_ws",
+        "workingDir": "./<project_dir2>/robot_ws",
         "cmdArgs": ""
       }
     },
     {
       "id": "DeliveryChallenge_SimulationJob1",
-      "name": "Delivery Challenge navigation",
+      "name": "Delivery Challenge Navigation",
       "type": "simulation",
       "cfg": {
         "simulationApp": {
           "name": "<simulation_app_name>",
-          "sourceBundleFile": "./<project_dir>/simulation_ws/bundle/output.tar",
+          "sourceBundleFile": "./<project_dir2>/simulation_ws/bundle/output.tar",
           "architecture": "X86_64",
           "s3Bucket": "<bucket_name>",
           "launchConfig": {
@@ -69,7 +51,7 @@
         "robotApp": {
           "name": "<robot_app_name>",
           "s3Bucket": "<bucket_name>",
-          "sourceBundleFile": "./<project_dir>/robot_ws/bundle/output.tar",
+          "sourceBundleFile": "./<project_dir2>/robot_ws/bundle/output.tar",
           "architecture": "X86_64",
           "robotSoftwareSuite": {
             "version": "<ros_version>",
@@ -77,13 +59,14 @@
           },
           "launchConfig": {
             "packageName": "delivery_robot_sample",
-            "launchFile": "navigation_robot.launch",
+            "launchFile": "navigation_simulation.launch",
             "environmentVariables": {
-            }
+            },
+            "streamUI": true
           }
         },
         "simulation": {
-          "maxJobDurationInSeconds": 5400,
+          "maxJobDurationInSeconds": 1800,
           "failureBehavior": "Fail",
           "iamRole": "<iam_role>",
           "vpcConfig": {
@@ -97,17 +80,17 @@
     },  
     {
       "id": "DeliveryChallenge_SimulationJob2",
-      "name": "Delivery Challenge controller",
+      "name": "Delivery Challenge SLAM",
       "type": "simulation",
       "cfg": {
         "simulationApp": {
           "name": "<simulation_app_name>",
-          "sourceBundleFile": "./<project_dir>/simulation_ws/bundle/output.tar",
+          "sourceBundleFile": "./<project_dir2>/simulation_ws/bundle/output.tar",
           "architecture": "X86_64",
           "s3Bucket": "<bucket_name>",
           "launchConfig": {
             "packageName": "delivery_challenge_simulation",
-            "launchFile": "create_stage.launch",
+            "launchFile": "create_stage0.launch",
             "environmentVariables": {
               "TURTLEBOT3_MODEL": "burger" 
             }
@@ -128,7 +111,7 @@
         "robotApp": {
           "name": "<robot_app_name>",
           "s3Bucket": "<bucket_name>",
-          "sourceBundleFile": "./<project_dir>/robot_ws/bundle/output.tar",
+          "sourceBundleFile": "./<project_dir2>/robot_ws/bundle/output.tar",
           "architecture": "X86_64",
           "robotSoftwareSuite": {
             "version": "<ros_version>",
@@ -136,9 +119,11 @@
           },
           "launchConfig": {
             "packageName": "delivery_robot_sample",
-            "launchFile": "controller.launch",
+            "launchFile": "slam_simulation.launch",
             "environmentVariables": {
-            }
+              "TURTLEBOT3_MODEL": "burger" 
+            },
+            "streamUI": true
           }
         },
         "simulation": {
@@ -161,15 +146,6 @@
       "runCfgIds": [
         "DeliveryChallenge_Cfg03",
         "DeliveryChallenge_Cfg04"
-      ]
-    },
-    {
-      "id": "fc7f3c40-0440-afb2-897a-dc41ee389c3b",
-      "name": "Delivery Challenge Simulation app build -> bundle",
-      "type": "workflow",
-      "runCfgIds": [
-        "DeliveryChallenge_Cfg01",
-        "DeliveryChallenge_Cfg02"
       ]
     }
   ]

@@ -74,7 +74,7 @@ install(PROGRAMS scripts/launch_navigation_stack.sh
   DESTINATION ${CATKIN_PACKAGE_BIN_DESTINATION}
 )
 
-install(DIRECTORY srv launch settings
+install(DIRECTORY srv launch settings rviz
 	DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 

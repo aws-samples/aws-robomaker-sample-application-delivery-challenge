@@ -1,4 +1,0 @@
-<launch>
-  <include file="$(find delivery_robot_sample)/launch/tb3_robot_controller.launch" />
-  <include file="$(find delivery_robot_sample)/launch/navigation.launch" />
-</launch>

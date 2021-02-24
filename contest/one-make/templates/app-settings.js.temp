@@ -1,0 +1,7 @@
+
+  const region = '<aws_region>';
+  const iotendpoint = '<iot_endpoint>';
+  const iotclientId = '<iot_thing>'
+  const subscribe_topic = "<iot_thing>/pub";
+  const publish_topic = "<iot_thing>/sub";
+  const PoolId = '<cognito_identity_pool_id>';

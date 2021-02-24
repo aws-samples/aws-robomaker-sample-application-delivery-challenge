@@ -1,0 +1,23 @@
+<?xml version='1.0'?>
+<sdf version='1.4'>
+  <model name="hard_track">
+    <link name="link">
+      <collision name="collision">
+        <geometry>
+          <mesh>
+            <uri>file://playroom_v2/meshes/collision_wall.stl</uri>
+            <scale>0.001 0.001 0.001</scale>
+          </mesh>
+        </geometry>
+      </collision>
+      <visual name="visual">
+        <geometry>
+          <mesh>
+            <uri>file://playroom_v2/meshes/visual_v5.dae</uri>
+          </mesh>
+        </geometry>
+      </visual>
+    </link>
+    <static>1</static>
+  </model>
+</sdf>
