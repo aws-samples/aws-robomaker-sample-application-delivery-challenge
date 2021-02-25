@@ -8,7 +8,7 @@ find_package(catkin REQUIRED COMPONENTS
 
 catkin_package(DEPENDS gazebo_ros)
 
-install(DIRECTORY launch 
+install(DIRECTORY launch urdf
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}
 )
 
@@ -18,9 +18,6 @@ install(FILES ${turtlebot3_description_DIR}/../rviz/model.rviz
   RENAME turtlebot3_model.rviz
 )
 
-install(DIRECTORY meshes/
-  DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/meshes
-)
 install(DIRECTORY models/
   DESTINATION ${CATKIN_PACKAGE_SHARE_DESTINATION}/models
 )

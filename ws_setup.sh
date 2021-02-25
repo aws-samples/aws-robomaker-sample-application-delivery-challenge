@@ -24,15 +24,19 @@ pip3 install -U awscli
 pip3 install -U colcon-common-extensions colcon-ros-bundle colcon-bundle
 pip3 install boto3
 
-STACK_NAME1=deliverychallenge`echo $C9_USER|tr -d [\.\\-=_]` 
-STACK_NAME2=deliverychallengecognito`echo $C9_USER|tr -d [\.\\-=_]` 
+STACK_NAME1=deliverychallenge`echo $C9_USER|tr -d [].\\\-\\\=_/` 
+STACK_NAME2=deliverychallengecognito`echo $C9_USER|tr -d [].\\\-\\\=_/` 
 
 aws cloudformation deploy --template-file ./cf_templates/bootstrap.cfn.yaml --stack-name $STACK_NAME1 --capabilities CAPABILITY_NAMED_IAM
 aws cloudformation deploy --template-file ./cf_templates/cognito_setting.cfn.yaml --stack-name $STACK_NAME2 --capabilities CAPABILITY_IAM
 
 ./install_utils/setup.bash
 ./setup_ROBOTIS_sample.sh
+
 curl -o ./robot_ws/src/aws_game_manager/certs/AmazonRootCA1.pem https://www.amazontrust.com/repository/AmazonRootCA1.pem
 
 python3 ./ws_setup.py $STACK_NAME1 $STACK_NAME2
 
+if [ -f ~/environment/roboMakerSettings.json ]; then
+    cp ./roboMakerSettings.json ~/environment/roboMakerSettings.json
+fi

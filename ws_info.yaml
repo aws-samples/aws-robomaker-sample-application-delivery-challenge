@@ -1,3 +1,0 @@
-vpc: # set VPC ID if you want to use specific VPC for running simulation
-security_groups:  # Set security groups ID with multi line array notation (-) if you use your specific VPC for simulation
-subnets: # Set subnets in your VPC with multi line array notation (-) if you use your specific VPC for simulation       

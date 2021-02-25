@@ -1,0 +1,10 @@
+<launch>
+  <arg name="use_sim_time" default="true"/>
+  <param name="use_sim_time" value="$(arg use_sim_time)"/>
+  
+  <include file="$(find delivery_robot_sample)/launch/controller.launch" />
+  <include file="$(find delivery_robot_sample)/launch/navigation.launch" />
+  
+  <!-- This can only work in simulation -->
+  <include file="$(find delivery_robot_sample)/launch/rviz_for_navigation.launch" />
+</launch>

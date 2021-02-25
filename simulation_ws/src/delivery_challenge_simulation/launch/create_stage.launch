@@ -5,7 +5,7 @@
   <arg name="gui" default="false"/>
 
   <include file="$(find gazebo_ros)/launch/empty_world.launch">
-    <arg name="world_name" value="$(find delivery_challenge_simulation)/worlds/stage.world"/>
+    <arg name="world_name" value="$(find delivery_challenge_simulation)/worlds/stage_v2.world"/>
     <arg name="paused" value="false"/>
     <arg name="use_sim_time" value="true"/>
     <arg name="gui" value="$(arg gui)"/>
@@ -14,9 +14,25 @@
     <arg name="verbose" value="false"/>
   </include>
 
-  <!-- Spawn Robot -->
-  <include file="$(find turtlebot3_description_reduced_mesh)/launch/spawn_turtlebot.launch">
-        <arg name="x_pos" value="0.0"/>
-        <arg name="y_pos" value="0.0"/>
-  </include>
+  <!-- Optional environment variable, default is "waffle_pi". Note that "burger" does not have a camera -->
+  <arg name="model" default="$(optenv TURTLEBOT3_MODEL burger)" doc="model type [burger, waffle, waffle_pi]"/>
+
+  <!-- You may override arg parmaters when including this launch file -->
+  <arg name="x_pos" default="0.0"/>
+  <arg name="y_pos" default="0.0"/>
+  <arg name="z_pos" default="0.0"/>
+  <arg name="roll" default="0.0"/>
+  <arg name="pitch" default="0.0"/>
+  <arg name="yaw" default="0.0"/>
+
+  <!-- Spawn the robot into Gazebo with the turtlebot description -->
+  <param name="robot_description" command="$(find xacro)/xacro --inorder $(find delivery_challenge_simulation)/urdf/turtlebot3_burger.urdf.xacro" />
+  <node pkg="gazebo_ros" type="spawn_model" name="spawn_urdf" 
+    args="-urdf -param robot_description -model turtlebot3_$(arg model)
+          -x $(arg x_pos) -y $(arg y_pos) -z $(arg z_pos) 
+          -R $(arg roll) -P $(arg pitch) -Y $(arg yaw)"/>
+
+  <!-- Publish joint states -->
+  <node name="joint_state_publisher" pkg="joint_state_publisher" type="joint_state_publisher" />
+  
 </launch>

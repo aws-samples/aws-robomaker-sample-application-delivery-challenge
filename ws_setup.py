@@ -31,6 +31,7 @@ SYSTEM_INFO = [ "aws_region",
                 "ros_version",
                 "gazebo_version",
                 "project_dir",
+                "project_dir2",
                 "vpc", 
                 "security_groups", 
                 "subnets",
@@ -59,9 +60,9 @@ SETTINGS = [    "iot_attach_principal_policy",
                 "robomaker_settings"]
 
 APPNAME_PREFIX="deliverychallenge"
-BROWSER_UI_PATH="browser/js"
-THING_CERT_DEST_PATH="robot_ws/src/aws_game_manager/certs"
-SAMPLE_APPLICATION_SETTINGS_PATH="robot_ws/src/delivery_robot_sample/settings"
+BROWSER_UI_PATH="./browser/js"
+THING_CERT_DEST_PATH="./robot_ws/src/aws_game_manager/certs"
+SAMPLE_APPLICATION_SETTINGS_PATH="./robot_ws/src/delivery_robot_sample/settings"
 CFStackName1 = "" # Specify stack name through command parameter
 CFStackName2 = "" # Specify stack name through command parameter
 
@@ -146,6 +147,15 @@ class Setup:
         log("check project dir")
         result = os.getcwd().split("/")[-1]
         return result
+
+    def check_project_dir2(self):
+        log("check project dir from /home/ubuntu/environment")
+        basepath = "/home/ubuntu/environment"
+        cdir = os.getcwd()
+        if cdir.find(basepath) == 0:
+            return cdir[len(basepath)+1:]
+        else:
+            return ""
 
     def check_aws_region(self):
         log("check region")
@@ -237,7 +247,7 @@ class Setup:
 
     def setup_robomaker_settings(self):
         log("setup roboMakerSettings.json..")
-        self.update_setting_file("templates/roboMakerSettings.temp"  ,"../roboMakerSettings.json" )
+        self.update_setting_file("templates/roboMakerSettings.temp"  ,"./roboMakerSettings.json" )
         return True
     
     def setup_sample_app_settings(self):
@@ -280,14 +290,7 @@ class Setup:
                 sys.exit(1)
                 
             log("Setp 3. simulation_ws bundle...")
-            if self.settings["aws_region"] == "ap-northeast-1":
-                # Running in Tokyo region. Use JP mirror for ubuntu packge file.
-                if self.settings["ros_version"] == "Melodic":
-                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.bionic.sources.list".split())
-                else:
-                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.xenial.sources.list".split())
-            else:
-                result = subprocess.call("colcon bundle".split())
+            result = subprocess.call("colcon bundle".split())
             if result == 0:
                 log(" =>OK")
             else:
@@ -315,14 +318,7 @@ class Setup:
                 sys.exit(1)
                 
             log("Setp 6. robot_ws bundle...")
-            if self.settings["aws_region"] == "ap-northeast-1":
-                # Running in Tokyo region. Use JP mirror for ubuntu packge file.
-                if self.settings["ros_version"] == "Melodic":
-                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.bionic.sources.list".split())
-                else:
-                    result = subprocess.call("colcon bundle --apt-sources-list ../install_utils/jp.xenial.sources.list".split())
-            else:
-                result = subprocess.call("colcon bundle".split())
+            result = subprocess.call("colcon bundle".split())
             if result == 0:
                 log(" =>OK")
             else:

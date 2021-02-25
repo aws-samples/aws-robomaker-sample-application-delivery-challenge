@@ -1,0 +1,11 @@
+endpoint: <iot_endpoint>
+credentialEndpoint: <iot_credential_endpoint>
+rootCAFile: AmazonRootCA1.pem
+certFile: thing.cert.pem
+privateKeyFile: thing.private.key
+mqttMode: both
+useWebsocket: false
+thingName: <iot_thing>
+subscribeTopic: <iot_thing>/sub
+publishTopic: <iot_thing>/pub
+roleAlias: <iot_role_alias>
