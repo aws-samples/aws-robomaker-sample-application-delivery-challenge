@@ -32,7 +32,7 @@ aws cloudformation deploy --template-file ../../cf_templates/cognito_setting.cfn
 
 ../../install_utils/setup.bash
 
-aws s3 cp  s3://deliverychallenge2021-assets/setup/simulation.tar ./onemake_simulation_ws/bundle/output.tar
+curl -o ./onemake_simulation_ws/bundle/output.tar https://deliverychallenge2021-assets.s3-ap-northeast-1.amazonaws.com/setup/simulation.tar
 
 curl -o ./onemake_robot_ws/src/aws_game_manager/certs/AmazonRootCA1.pem https://www.amazontrust.com/repository/AmazonRootCA1.pem
 

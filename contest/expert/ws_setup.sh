@@ -33,7 +33,7 @@ aws cloudformation deploy --template-file ../../cf_templates/cognito_setting.cfn
 ../../install_utils/setup.bash
 ../../setup_ROBOTIS_sample.sh
 
-aws s3 cp s3://deliverychallenge2021-assets/setup/simulation.tar ./simulation_ws/bundle/output.tar
+curl -o ./simulation_ws/bundle/output.tar https://deliverychallenge2021-assets.s3-ap-northeast-1.amazonaws.com/setup/simulation.tar
 
 cd ./robot_ws
 rosws update 
