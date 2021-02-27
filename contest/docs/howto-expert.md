@@ -232,7 +232,7 @@ Robot Delivery Challenge 予選はシミュレーションを利用したタイ�
 
 ## 4.カスタマイズについて
 
-提供の地図を作る機能とナビゲーション機能はサンプルアプリケーションとして提供しています。サンプルアプリケーションとして提供されている箇所は contest/expert/robot_ws/src/delivery_robot_sample と contest/expert/robot_ws/src/turtlebot3 配下のファイルで、この箇所の変更は自由です。contest/expert/robot_ws/src/aws_game_manager 配下はコンテストの計測などに関わるコードが含まれていますので変更禁止です。 simulation_ws 配下にはコンテストで扱うシミュレーヨンワールドなどの情報が入っておりこれも変更禁止です。
+コンテストで扱うサンプルアプリケーションは contest/expert/robot_ws/src/delivery_robot_sample と contest/expert/robot_ws/src/turtlebot3 配下にあり、この箇所の変更は自由です。contest/expert/robot_ws/src/aws_game_manager 配下はコンテストの計測などに関わるコードが含まれていますので変更禁止です。 simulation_ws 配下にはコンテストで扱うシミュレーヨンワールドなどの情報が入っておりこれも変更禁止です。
 
 サンプルアプリケーションの中身の概要については [アプリケーションコードの詳細と改良の方法(Detail)](detail.md) のドキュメントを参照してください。
 
