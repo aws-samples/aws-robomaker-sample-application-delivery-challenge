@@ -57,7 +57,10 @@ SETTINGS = [    "iot_attach_principal_policy",
                 "iot_cert_settings",
                 "sample_app_settings",
                 "browser_ui_settings",
-                "robomaker_settings"]
+                "robomaker_settings",
+                "launch_slam_settings",                
+                "launch_navigation_settings"                
+                ]
 
 APPNAME_PREFIX="deliverychallenge"
 BROWSER_UI_PATH="./browser/js"
@@ -249,7 +252,19 @@ class Setup:
         log("setup roboMakerSettings.json..")
         self.update_setting_file("templates/roboMakerSettings.temp"  ,"./roboMakerSettings.json" )
         return True
-    
+
+    def setup_launch_slam_settings(self):
+        log("setup application launcher launch_slam.sh..")
+        self.update_setting_file("templates/launch_slam.sh.temp"  ,"./launch_slam.sh" )
+        os.chmod("./launch_slam.sh", 0o777)
+        return True
+
+    def setup_launch_navigation_settings(self):
+        log("setup application launcher launch_navigation.sh..")
+        self.update_setting_file("templates/launch_navigation.sh.temp"  ,"./launch_navigation.sh" )
+        os.chmod("./launch_navigation.sh", 0o777)
+        return True
+
     def setup_sample_app_settings(self):
         log("setup sample app setting file settings.yaml..")
         self.update_setting_file("templates/settings.yaml.temp"  ,"{}/settings.yaml".format(SAMPLE_APPLICATION_SETTINGS_PATH))
