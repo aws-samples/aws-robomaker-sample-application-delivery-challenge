@@ -37,15 +37,21 @@ This sample application provides two functionalities. One is creating map and th
 
 ### Create map
 
-1. From RoboMaker development environment, select menu *Run* ->  *Launch Simulation* -> *Delivery Challenge SLAM*
+1. A shell script to launch application in RoboMaker simulation is created when you executed set up shell script *ws_setup.sh*. In terminal window, execute following shell script to launch application in RoboMaker simulation with map creation mode.
 
-    (If you don't see the menu, please reload the page for development environment once)
+    ```bash
+    ./launch_slam.sh 
+    ```
 
-2. CLick [**Connect**] button of [**GZClient**]. It shows the simulation world.
+    (The shell script should exist under the same directory you executed *./ws_setup.sh*)
+
+2. Go to [RoboMaker simulation in AWS Management console](console.aws.amazon.com/robomaker/home). You will find a simulation job under Preparing or Running status, open the simulation job. Simulation job detail page will be displayed.
+
+3. CLick [**Connect**] button of [**GZClient**]. It shows the simulation world.
 
     ![gazebo](docs/images/e003_simulation3.png)
 
-3. Click [**Connect**] button of [**Robot Application**] panel. It will bring the visualize tool for the robot's sensing data.
+4. Click [**Connect**] button of [**Robot Application**] panel. It will bring the visualize tool for the robot's sensing data.
 
     ![gazebo_rviz](docs/images/e004_simulation4.png)
 
@@ -57,21 +63,29 @@ This sample application provides two functionalities. One is creating map and th
 
     When you are fine for the map, press [Save Map] button in the remote controller interface. The map file will then be saved into Amazon S3 bucket. The bucket the map is stored is described in the *robot_ws/src/delivery_robot_sample/settings/settings.yaml file*.
 
- 4. Cancel the simulation by selecting *Actions* -> *Cancel* from the detail page of the simulation job.
+ 5. Cancel the simulation by selecting *Actions* -> *Cancel* from the detail page of the simulation job.
 
 ### Navigate the world
 
-1. From RoboMaker development environment, select menu *Run* ->  *Launch Simulation* -> *Delivery Challenge Navigation*
+1. A shell script to launch application in RoboMaker simulation is created when you executed set up shell script *ws_setup.sh*. In terminal window, execute following shell script to launch application in RoboMaker simulation with navigation mode.
 
-2. CLick [**Connect**] button of [**GZClient**]. It shows the simulation world. This time moving objects are also apper.
+    ```bash
+    ./launch_navigation.sh 
+    ```
+
+    (The shell script should exist under the same directory you executed *./ws_setup.sh*)
+
+2. Go to [RoboMaker simulation in AWS Management console](console.aws.amazon.com/robomaker/home). You will find a simulation job under Preparing or Running status, open the simulation job. Simulation job detail page will be displayed.
+
+3. CLick [**Connect**] button of [**GZClient**]. It shows the simulation world. This time moving objects are also apper.
 
     ![gazebo2](docs/images/011_simulation4.png)
 
-3. Click [**Connect**] button of [**Robot Application**] in **Robot application tools**. It will bring the visualize tool for the robot's sensing data.
+4. Click [**Connect**] button of [**Robot Application**] in **Robot application tools**. It will bring the visualize tool for the robot's sensing data.
 
     ![rviz2](docs/images/012_simulation5.png)
 
-4. Open the remote controller interface again. Set the designated location like x: 7.2, y: 2.3, heading: 0 in Goal section of the controller. Click [[G]o To] button, then. The robot will then create the navigation route to go to the location and the robot auto drive to the location.
+5. Open the remote controller interface again. Set the designated location like x: 7.2, y: 2.3, heading: 0 in Goal section of the controller. Click [[G]o To] button, then. The robot will then create the navigation route to go to the location and the robot auto drive to the location.
 
     ![navigation](docs/images/016_navigation.png)
 
